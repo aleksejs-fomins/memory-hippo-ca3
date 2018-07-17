@@ -1,0 +1,45 @@
+--------------------------------------
+Plans
+--------------------------------------
+1) Research what is currently known about anatomical connectivity of the CA3. Neuron number, type distribution, connectivity, hierarchy, ratio of forwards to backwards, etc.
+2) Find a more-or-less realistic model in terms of computational size that is freely accessible
+3) Modify it in order to include astrocyte network, its feed into the system in terms of synaptic noise.
+4) Research following effects
+  4.1) States of system operation based on pure synaptic noise.
+     - Oscillations, sharp-waves
+     - Weak, sub-critical and critical regimes
+  4.2) Reaction to propagating glutamate-releasing astrocyte wave
+  4.3) Pattern completion - model of HippoCA3 that can reproduce completion of incomplete input patterns.
+5) Compare with known experimental data
+
+--------------------------------------
+Fears
+--------------------------------------
+1) What is actually experimentally testable? If it is just the presence or absence of oscillations of certain frequency, or a giant flash in responce to synchronized glutamate release - it is nearly certain that parameters of astrocytes and the network can be adjusted to reproduce such behaviour.
+  4.1) was demonstrated in simulations already. We will likely hit a weak or a critical regime first, then by adjusting parameters get all sort of chaotic and oscillating regimes. What does it prove?
+  4.2) is likely to produce a neural wave somewhat resembling the astrocyte wave. What does it prove?
+  4.3) appears to me as a fully theoretical task - not testable.
+Is there a reason to spend time on a simulation with loosely defined parameters, loosely comparable to experiment, and with more-or-less predictable outcome?
+2) 
+
+--------------------------------------
+Approach
+--------------------------------------
+a) List-Plan-1). Anatomy literature list. Add to each parameter a reference, range, reliability, criticality for model
+b) List-Plan-2). open-source models. For each model, present properties same as in Plan 1), summary of results obtained. For each model, write an estimate number of hours to adapt it to perform necessary steps
+c) List-Plan-4.3). Current publications & results on pattern matching in HippoCA3
+d) From Stew, get exactly how the experimental data will look like
+e) Make decision together with Fritjof and Stew, about what size of action will
+
+--------------------------------------
+Current conclusions
+--------------------------------------
+* Try not to go into pure modeling. That is not what group does, can't be much help. Try to stand ground on modeling small experimentally-testable features.
+
+
+
+I must admit I have a certain fear. So far I see two angles of attack on understanding brain function
+1) Purely theoretical - trying to guess how a brain-like structure could be working, given some principles observed from anatomy: hierarchy, stochasticity, multiple-time-scale, recurrence, sequence-based-memory, etc. Such approach would devise an algorithm of function of a certain dynamical system, simulate it, and attempt to adjust parameters to obtain meaningful behaviour.
+2) Data-driven - observing the the exact data available in state of the art measurement: type of observables (microscopic/mesoscopic neural activities, behaviour, neurotransmitters), quantity of data, accuracy of measurement (sensitivity, specificity). Based on available data, a few statistical rules of thumb can be used to guess an upper bound on the discretization timescale and the number of parameters, that a given model/estimator can have, in order to be reliably estimateable. Finally, to try estimating a few of selected models/estimators, and see if they can uncover some insights about the possible brain function.
+My fear is that I do not currently see a way to bridge these two approaches.
+

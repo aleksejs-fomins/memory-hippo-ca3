@@ -1,0 +1,11 @@
+Hypothesis: Astrocytes trigger Sharp Wave Ripples (SWR) by synchronously releasing glutamate. Thus astrocyte network synchronously activates prior to SWR.
+
+Stew will do:
+1) Check under what conditions glutamate is released. Monitor glutamate levels and astrocyte activation levels and correlate in time with SWR
+2) Check if astrocyte-astrocyte communication important by inhibiting it
+3) Check effects of inhibiting/enhancing astrocytic functions on SWR generation and memory consolidation during tasks for wake mice.
+
+Implications on modeling:
+1) Stew should be able to provide constants, such as
+  * speed of astrocyte network activation
+  * quantity and frequency of glutamate release

@@ -1,0 +1,13 @@
+Plan of attack on HippoCA3
+[] Read Brandalise
+[+] Read Stew proposal
+[] Re-read noise paper, see how important are parameters for SWR generation
+  [] Is any amount of release over a certain threshold enough?
+  [] If not, must we think of a feedback mechanism in the model that would control if too much is released? The amount/frequency to be released by astrocyte would depend on the amount/frequency released by pre-synaptic neuron.
+[] Summarize capabilities of currently existing codes
+[] Extract data again from all papers:
+  [] Stew's, big book, Guzman appendix, noise paper appendix
+[] Pose the question directly
+  - How are simulations useful to our understanding of the brain? How are they compatible with experiments?
+  
+

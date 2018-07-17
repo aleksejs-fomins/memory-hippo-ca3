@@ -1,0 +1,15 @@
+Questions For Andreea:
+
+Performance
+    * Why Hamming distance so small for criticality? If 1 flip in source results in ~1 flip in target, the system is effectively decoupled.
+    * Why no obvious difference for regimes (T=0..10000, T=10000..20000, T>20000) ?
+
+Assumptions:
+    * Only EXC neurons without input have intrinsic plasticity
+    * Only EXC->EXC weights will have synaptic plasticity
+    * Input letters presented only for one frame
+    * Separate neurons per letter - no binary code
+
+
+
+If the thresholds are only increased when correct letter appears, and decreased the rest of the time, doesn't that mean that all the thresholds will drop to 0 sooner or later?
