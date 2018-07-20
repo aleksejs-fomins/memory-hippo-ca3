@@ -1,6 +1,8 @@
 import random
 import numpy as np
 from scipy.sparse import csr_matrix
+import matplotlib.pyplot as plt
+import os
 
 def randUMat(dim, rng):
     return rng[0] + (rng[1] - rng[0]) * np.random.rand(dim[0], dim[1])
@@ -28,4 +30,30 @@ def spRandUMat(dim, rng, p_sp):
     
     return csr_matrix((val, (idx2Drow, idx2Dcol)), shape=dim)
     
+
+def saveMatPlot(mat, filename, dpi):
+    fig = plt.figure(figsize=(mat.shape[0]/dpi, mat.shape[1]/dpi), dpi=dpi, frameon=False)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+    plt.imshow(mat.T)
+    plt.savefig(filename)
+    plt.close()
     
+    
+def longMatMovie(mat, window, filebasename, dpi, fps):
+    fig = plt.figure(figsize=(window/dpi, mat.shape[1]/dpi), dpi=dpi, frameon=False)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+    thisPlot = plt.imshow(mat[:window].T)
+    plt.savefig(filebasename+"0.png")
+    
+    for i in range(1, len(mat) - window):
+        thisPlot.set_data(mat[i:i+window].T)
+        plt.savefig(filebasename+str(i)+".png")
+        #saveMatPlot(mat[i:i+window], filebasename+str(i)+".png", dpi)
+    
+    plt.close()
+    
+    os.system("ffmpeg -r "+str(fps)+" -i "+filebasename+"%01d.png -vcodec mpeg4 -y movie.mp4")
