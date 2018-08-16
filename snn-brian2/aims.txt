@@ -1,0 +1,11 @@
+Implement single population SNN framework by the same principle as the discrete framework
+  * Balanced Exc-Inh network(N, PConn, WITH_SYN)
+  * dV/dt = -(V-V0)/tau + W.Spike + I + Noise
+  * Spike on V > T, reset to V0 
+  * dT/dt = -nu * (SPIKE_RATE - SPIKE_RATE_0)
+  * dW/dt = STDP
+  
+Properties
+  - Allow flexible rates for all plasticities, separately for exc and inh
+  - Allow flexible input
+  - Allow switching plasticity on and off between run segments
