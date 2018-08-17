@@ -1,0 +1,31 @@
+Traub 2000
+  - https://www.ncbi.nlm.nih.gov/pubmed/11069606
+3072 pyramidal cells and 384 interneurons (each multicompartmental and containing a segment of unmyelinated axon), we employed computer simulations to examine conditions under which network oscillations might occur with the experimentally determined properties. We found that such network oscillations could be generated, robustly, when gap junctions were located between pyramidal cell axons, as suggested to occur based on studies of spontaneous high-frequency (> 100 Hz) network oscillations in the in vitro hippocampus. In the model, pyramidal cell somatic firing was not essential for the oscillations. Critical components of the model are (i) the plexus of pyramidal cell axons, randomly and sparsely interconnected by gap junctions; (ii) glutamate synapses onto interneurons; (iii) synaptic inhibition between interneurons and onto pyramidal cell axons and somata; (iv) a sufficiently high rate of spontaneous action potentials generated in pyramidal cell axons. This model explains the dependence of network oscillations on GABAA and AMPA receptors, as well as on gap junctions. Besides the existence of axon–axon gap junctions, the model predicts that many of the pyramidal cell action potentials, during sustained gamma oscillations, are initiated in axons.
+
+
+Traub 2007
+  - http://jn.physiology.org/content/93/4/2194.long
+  - Thalamocortical model with 3500 multi-compartment neurons
+  - replicates gamma-oscillations
+
+Stacey 2009
+ - 80 pyramidal cells
+ - 20 basket cells
+ - Output of network is the averaged somatic membrane voltage of all 80 pyramidal cells.
+ - Each pyramidal cell has an independent noise synapse.
+ - Each basket cell (20) synapses with all 80 pyramidal cells and receives synapses from 10 pyramidal cells
+ - The basket cells were connected efferently all-to-all with the pyramidal cells using inhibitory γ-aminobutyric acid (GABA) synapses.
+ - Pyramidal cells had five compartments (basal dendrite, soma, and three-segment apical dendrite) and contained current sources from the following ion channels: sodium INa, A-type potassium IKa, delayed-rectifier potassium IKdr, and noninactivating, nonspecific cation Ih.
+ - Basket cells contained one compartment with INa and IKdr (with different parameters from pyramidal cells
+ - NEURON code (last developed 2009, old hand-built network constructor)
+
+
+Basket Cells (Inhibitory Interneurons)
+
+
+RECURRENT SYNAPTIC CONNECTIONS (Stacey2009)
+  - 5% conservative estimate
+  - 50/80 is pathological
+GAP JUNCTIONS (What is this?)
+  - "no standard quantitative parameters to describe the range of gap junction connectivity in vivo, in either normal or pathological conditions"
+
