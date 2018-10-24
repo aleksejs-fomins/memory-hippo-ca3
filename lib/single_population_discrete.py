@@ -7,7 +7,7 @@ from sklearn.preprocessing import normalize
 #from scipy.sparse import csr_matrix, hstack, vstack
 import scipy.sparse
 
-import aux
+import matrices_lib
 
 
 '''
@@ -96,8 +96,8 @@ class SinglePopulationDiscrete:
                     # Note the swap of N_ROW and N_COL, because in order for the matrix to be named FROM_TO,
                     # its rows must be TO, and its cols must be FROM
                     WMagRow = p['W_MAG_' + rowPopKey]
-#                     self.v[WKey], self.p[WIdxKey] = aux.spRandUMatBase((N_COL, N_ROW), WRangeRow, p['P_CONN'][rckey])
-                    self.v[WKey] = WMagRow * aux.spRandUMat((N_COL, N_ROW), [0, 1], p['P_CONN'][rckey])
+#                     self.v[WKey], self.p[WIdxKey] = matrices_lib.spRandUMatBase((N_COL, N_ROW), WRangeRow, p['P_CONN'][rckey])
+                    self.v[WKey] = WMagRow * matrices_lib.spRandUMat((N_COL, N_ROW), [0, 1], p['P_CONN'][rckey])
                     
                     # Excract its sparse connectivity indices.
                     # Note that we do not intend to change neuron connectivity during simulation,
@@ -165,7 +165,7 @@ class SinglePopulationDiscrete:
         vnew['T_' + rowPopKey] = T_ROW + IP_RATE_ROW * (V_ROW - V_EQ_ROW)
 
         # Clip all thresholds to allowed values
-        aux.clipMat(vnew['T_' + rowPopKey], T_RANGE_ROW)
+        matrices_lib.clipMat(vnew['T_' + rowPopKey], T_RANGE_ROW)
         
         
     # Calculate change in weight due to synaptic plasticity due to additive STDP
@@ -201,7 +201,7 @@ class SinglePopulationDiscrete:
             
             
             # Clip all excitatory weights to their allowed ranges
-            # aux.clipMat(vnew[WKey], self.p['W_RANGE_' + rowPopKey])
+            # matrices_lib.clipMat(vnew[WKey], self.p['W_RANGE_' + rowPopKey])
         else:
             vnew[WKey] = WThis
 
