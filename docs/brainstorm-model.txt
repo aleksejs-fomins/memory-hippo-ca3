@@ -1,0 +1,60 @@
+-----
+TODO
+-----
+[ ] Re-read any stuff from Andreea and Chris we have, try recall what they actually want
+  * Memory machine with IP & STDP - what should it do?
+  * Astrocyte tickling of network - with what purpose? Just try out and see what happens?
+[ ] Also scan through Lisman2018
+  -> Idea1: Temporal linkage of events (timescale ~ hours)
+  -> Idea2: Helps create cell-assemblies during consolidation phase.
+  ? Timescale - IP
+
+[ ] WTF is STP needed for, what does it do?
+
+
+------------------------------
+Brainstorm-Astro-Criteria
+------------------------------
+Criteria_General:
+  * Impl (DS, Brian2)
+
+Criteria_Underlying_Neuro:
+  * Model (Bin, Rate, Spike, Conduct)
+  * Plasticity (Intrinsic, Homeostatic, STDP, STP, HeteroSyn)
+  * ConnNN (Dense, RandSparse, RandGeom)
+  * W_NN (Same, Rand, Geom)
+  * Input (None, Group, All)
+
+Criteria_Astro:
+  * Geom (nSynPerAstro, nSynPerNeuronPair)
+  * CommAA (None, Slow, Fast)
+  * Absorb - ?? - What is the current model, check
+  * Release - (Lag, TauDecay, 2var-DS, Efficiency)
+  
+------------------------------
+Brainstorm-Questions-Of-Interest
+------------------------------
+* Stable pattern formation and storage, pattern completion [Hiratani2014, Zenke2015]
+* Understanding what is the point of IP. STDP can theoretically do marking without IP. [Lisman2018]
+* Hippo Sleep Regimes [Wei2018]
+* Hierarchical autoencoder architectures
+* Sequence memory
+
+
+------------------------------
+Brainstorm-Models
+------------------------------
+
+* Marker-based 2-step memory: Have feedforward sparse layered net. Fast IP during stimulus, then slow STDP during noise.
+  - Is quick IP actually realistic? [Zenke2015] explicitly say that HP is slow and thus useless for this purpose...
+  - Why would IP not quickly recede to base values during 2nd phase?
+  - Is it actually feedforward, or recurrent like in [Hiratani2014]?
+  - Bullshit
+  
+* Marker-based set memory [Lisman2018]: Random sparse network. Slow IP, fast STDP. Patterns that happened close in time more likely to share neurons than those far apart. Later recall would recall other ones as well.
+  - If IP is slow, does it ever recede at all? Need to test
+  - This requires a stable synaptic plasticity mechanism, STDP alone will not suffice.
+
+  
+
+* Replay: How real geometry projects to neuronal geometry? Copy-Paste Haga's model, see what happens if nearby neurons are not nearby states
