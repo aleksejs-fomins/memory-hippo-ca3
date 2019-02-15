@@ -1,13 +1,6 @@
 -----
 TODO
 -----
-[ ] Re-read any stuff from Andreea and Chris we have, try recall what they actually want
-  * Memory machine with IP & STDP - what should it do?
-  * Astrocyte tickling of network - with what purpose? Just try out and see what happens?
-[ ] Also scan through Lisman2018
-  -> Idea1: Temporal linkage of events (timescale ~ hours)
-  -> Idea2: Helps create cell-assemblies during consolidation phase.
-  ? Timescale - IP
 
 [ ] WTF is STP needed for, what does it do?
 
