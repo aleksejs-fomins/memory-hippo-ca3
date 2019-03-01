@@ -4,6 +4,23 @@ def NeuronGroupLIF(N, V0, VMAX, TAU):
     nsp = {'V0' : V0, 'VMAX' : VMAX, 'TAU' : TAU}
     return NeuronGroup(N, 'dv/dt = (V0-v)/TAU : volt', threshold='v > VMAX', reset='v = V0', method='exact', namespace=nsp)
 
+def NeuronGroupLIF_HP(N, V0, TAU_V, RATE_AVG, T_MIN, T_MAX, ETA_T):
+    nsp = {'V0' : V0, 'TAU_V' : TAU_V, 'RATE_AVG' : RATE_AVG, 'T_MIN' : T_MIN, 'T_MAX' : T_MAX, 'ETA_T' : ETA_T}
+    # Membrane potential V leaks over time and is reinforced by input
+    # Neural spike rate R counts spikes of this neuron within a decaying time window
+    eqs_dyn = '''
+    dv/dt = (V0 - v) / TAU_V : volt
+    dT/dt = -ETA_T * (T - T_MIN) * (T_MAX - T) * RATE_AVG : volt
+    '''
+
+    # On spike, the threshold is increased
+    eqs_reset = '''
+    v = V0
+    T += ETA_T * (T - T_MIN) * (T_MAX - T)
+    '''
+    
+    return NeuronGroup(N, eqs_dyn, threshold='v > T', reset=eqs_reset, namespace=nsp)
+
 
 def SynapsesPlastic(G1, G2, plasticity_model):
     

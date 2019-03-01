@@ -24,10 +24,20 @@ def rates2spikes(rateArr, tMin, tMax):
 # From list of spike times and neuron indices,
 # separate spikes to individual neurons
 def spikes2lists(indList, tList, indMax):
-    spikeLists = [[]] * indMax
+#     npInd, npT = np.array(indList), np.array(tList)
+#     return [npT[npInd == i] for i in range(indMax)]
+    
+    spikeLists = [[] for i in range(indMax)]
     for ind, t in zip(indList, tList):
         spikeLists[ind] += [t]
+        
     return spikeLists
+
+def spikes2rate(spike_times, runtime, binsize):
+    bincount = int(runtime / binsize)
+    rate, bin_edges = np.histogram(spike_times, bins=bincount)
+    times = (bin_edges[1:] + bin_edges[:-1]) / 2
+    return times, rate
 
 
 # Takes list of spike times and neuron indices, writes average frame to a file
