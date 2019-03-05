@@ -33,9 +33,10 @@ def spikes2lists(indList, tList, indMax):
         
     return spikeLists
 
-def spikes2rate(spike_times, runtime, binsize):
-    bincount = int(runtime / binsize)
-    rate, bin_edges = np.histogram(spike_times, bins=bincount)
+def spikes2rate(spike_times, starttime, runtime, binsize):
+    bincount = int((runtime - starttime) / binsize)
+    counts, bin_edges = np.histogram(spike_times, bins=bincount, range=[float(starttime), float(starttime+runtime)])
+    rate  = counts / binsize
     times = (bin_edges[1:] + bin_edges[:-1]) / 2
     return times, rate
 
