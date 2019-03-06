@@ -8,13 +8,6 @@ def randUMat(dim, rng):
     return rng[0] + (rng[1] - rng[0]) * np.random.rand(dim[0], dim[1])
 
 
-# Clip all elements of matrix
-def clipMat(M, rng):
-    M[M < rng[0]] = rng[0]
-    M[M > rng[1]] = rng[1]
-    return M
-
-
 # Calclate L1 norm of a sparse matrix or numpy array
 def L1Avg(M):
     if type(M) is np.ndarray:
