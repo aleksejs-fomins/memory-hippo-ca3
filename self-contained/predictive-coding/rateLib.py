@@ -1,8 +1,12 @@
 import numpy as np
+#import scipy.integrate as integrate
+from integrator_lib import integrate_ode_ord1
 
 def makeconn(nrow, ncol, mattype):
     if mattype == "dense":
-        return np.random.uniform(0, 1, (nrow, ncol))
+        M = np.random.uniform(0, 1, (nrow, ncol))
+        M /= np.linalg.norm(M)
+        return M
     elif mattype == 'id':
         assert nrow==ncol, "dimensions of identity matrix must match"
         return np.identity(nrow)
@@ -30,6 +34,7 @@ class rateNeuronSimulator():
         self.pname2idx = {}   # Map population name  -> index
         self.psize = []       # Map population index -> size
         self.ptype = []       # Map population index -> type
+        self.peqtype = []     # Map population index -> eq_type
         
         # Synapse containers
         self.sname2idx = {}   # Map synapse name  -> index
@@ -67,11 +72,12 @@ class rateNeuronSimulator():
         return iidx
         
         
-    def add_population(self, pname, ptype, psize):
+    def add_population(self, pname, ptype, peqtype, psize):
         pidx = len(self.pname2idx)
         self.pname2idx[pname] = pidx
         self.ptype += [ptype]
         self.psize += [psize]
+        self.peqtype += [peqtype]
         return pidx
         
         
@@ -81,6 +87,7 @@ class rateNeuronSimulator():
         assert type2 != 'INP', "Input population can not be the target of a synapse"
         
         sidx = len(self.sname2idx)
+        self.sname2idx[sname] = sidx
         self.sconn += [(name1, name2)]
         self.stype += [stype]
         self.splast += [splast]
@@ -89,6 +96,7 @@ class rateNeuronSimulator():
     
     def construct(self):
         # Generating populations
+        self.N_POP_TOTAL = np.sum(self.psize)
         self.pop = [np.zeros(l) for l in self.psize]
         
         # Generating synapses
@@ -121,68 +129,122 @@ class rateNeuronSimulator():
             raise ValueError("Unknown synapse type", typepre)
             
             
+    # Compute neuronal value given all input to it
+    def eval_rhs_pop(self, x, inpx, peqtype):
+        if "LRN" in peqtype:    # Leaky rate neuron
+            rez = (inpx - x) / self.p['TAU_X']
+        elif "SRN" in peqtype:  # Slider rate neuron
+            rez = inpx / self.p['TAU_X']
+        else:
+            raise ValueError("Unexpedted neuronal equation type", peqtype)
+            
+        # If neuron must be positive, and velocity tries to make it negative, set velocity to zero instead
+        if "P" in peqtype:
+            rez[x + rez*self.p['DT'] < 0] = 0
+        
+        return rez
+            
+            
     # Compute RHS of plasticity ODE depending on plasticity type
     def eval_rhs_plast(self, xpre, xpost, W, splast):
         if splast is None:
             return None            # Return None if synapse is not plastic
+        elif splast == "Hebb":
+            rez = np.outer(xpost, xpre) / self.p['TAU_W']
         elif splast == "XX_forw":
-            return (np.outer(xpost, xpre) - np.outer(xpost, W.T.dot(xpost))) / self.p['TAU_W']
+            rez = np.outer(xpost, xpre - W.T.dot(xpost)) / self.p['TAU_W']
         elif splast == "XX_back":
-            return (np.outer(xpost, xpre) - np.outer(W.dot(xpre), xpre)) / self.p['TAU_W']
+            rez = np.outer(xpost - W.dot(xpre), xpre) / self.p['TAU_W']
         else:
             raise ValueError("Unexpected plasticity type", self.splast[sidx])
+            
+        # synapses are not allowed to be negative
+        rez[W - rez*self.p['DT'] < 0] = 0
+        return rez
 
 
     # Compute RHS for neuronal and synaptic dynamics
-    def get_rhs(self, timenow):
-        rhspop = [-x for x in self.pop]     # Initialize population RHS with leak
+    def get_rhs(self, timenow, pop, syn):
+        inputPerPop = [np.zeros(l) for l in self.psize]
         rhssyn = []
-        for (namepre, namepost), W, splast in zip(self.sconn, self.syn, self.splast):
+        for (namepre, namepost), W, splast in zip(self.sconn, syn, self.splast):
             idxpre, typepre   = self.get_idx(namepre)
             idxpost, typepost = self.get_idx(namepost)
             
-            xpre = self.pop[idxpre] if typepre != 'INP' else self.ifunc[idxpre](timenow)
-            xpost = self.pop[idxpost]
+            xpre = pop[idxpre] if typepre != 'INP' else self.ifunc[idxpre](timenow)
+            xpost = pop[idxpost]
             
             # Compute RHS for neuronal dynamics
-            rhspop[idxpost] += self.eval_syn_output(W, xpre, typepre) / self.p['TAU_X']
+            inputPerPop[idxpost] += self.eval_syn_output(W, xpre, typepre)
             
             # Compute RHS for synaptic dynamics
             rhssyn += [self.eval_rhs_plast(xpre, xpost, W, splast)]
                 
+        rhspop = [self.eval_rhs_pop(x, inpX, peqtype) for x, inpX, peqtype in zip(pop, inputPerPop, self.peqtype)]
         return rhspop, rhssyn
     
     
-    # Update values
-    def update(self, timenow):
-        rhspop, rhssyn = self.get_rhs(timenow)
+    # Pack simulation variables into single array
+    # Do not include parameters that are not plastic
+    def pack_var(self, pop, syn):
+        pop_pack = np.hstack(pop)
+        syn_pack = np.hstack([s.flatten() for i, s in enumerate(syn) if self.splast[i] is not None])
+        return np.hstack([pop_pack, syn_pack])
+    
+    
+    # Unpack simulation variables from a single array
+    # Do not include parameters that are not plastic
+    def unpack_var(self, pack):
+        pop_pack = pack[:self.N_POP_TOTAL]
+        syn_pack = pack[self.N_POP_TOTAL:]
         
-        # Update neurons
-        for i in range(len(self.pop)):
-            self.pop[i] += rhspop[i] * self.p['DT']
+        # Shift along 1D array, extract blocks of length psize
+        sh = 0
+        pop = []
+        for psize in self.psize:
+            pop += [pop_pack[sh:sh+psize]]
+            sh += psize
             
-        # Update synapses
+        # Shift along 1D array, extract blocks of length shape1D.
+        # If the block is not plastic, it is not present in the 1D array. Reuse generic one instead
+        sh = 0
+        syn = []
         for i in range(len(self.syn)):
-            if rhssyn[i] is not None:
-                self.syn[i] += rhssyn[i] * self.p['DT']
+            if self.splast[i] is None:
+                syn += [self.syn[i]]
+            else:
+                shape = self.syn[i].shape
+                shape1D = np.prod(shape)
+                syn += [syn_pack[sh:sh+shape1D].reshape(shape)]
+                sh += shape1D
+                
+        return pop, syn
+
                 
     def run(self, T_MAX):
         # Run simulation
-        t_arr = np.arange(0, T_MAX, self.p['DT']) + self.p['DT']        
-        for t in t_arr:
-            self.update(t_arr)
+        N_STEP = int(T_MAX / self.p['DT'])
+        #t_arr = np.linspace(0.0, self.p['DT']*N_STEP, N_STEP+1)
             
-            # Store populations if requested
-            if self.p['STORE_POP']:
-                for pname, pidx in self.pname2idx.items():
-                    self.results[pname] += [self.pop[pidx]]
-            if self.p['STORE_SYN']:
-                for sname, sidx in self.sname2idx.items():
-                    self.results[sname] += [self.syn[sidx]]
-            if self.p['STORE_SYN_NORM']:
-                for sname, sidx in self.sname2idx.items():
-                    self.results[sname+'_norm'] += [np.linalg.norm(self.syn[sidx])]
+        # Unpack variables, compute RHS, then pack RHS
+        rhs = lambda var, t: self.pack_var(*self.get_rhs(t, *self.unpack_var(var)))
+        
+        #sol = integrate.odeint(rhs, self.pack_var(self.pop, self.syn), t_arr)
+        sol = integrate_ode_ord1(rhs, self.pack_var(self.pop, self.syn),  self.p['DT'], N_STEP, method='rk2')
             
+        # Store populations if requested
+        if self.p['STORE_POP'] or self.p['STORE_SYN'] or self.p['STORE_SYN_NORM']:
+            for packed_step in sol:
+                pop, syn = self.unpack_var(packed_step)
+                if self.p['STORE_POP']:
+                    for pname, pidx in self.pname2idx.items():
+                        self.results[pname] += [pop[pidx]]
+                if self.p['STORE_SYN']:
+                    for sname, sidx in self.sname2idx.items():
+                        self.results[sname] += [syn[sidx]]
+                if self.p['STORE_SYN_NORM']:
+                    for sname, sidx in self.sname2idx.items():
+                        self.results[sname+'_norm'] += [np.linalg.norm(syn[sidx])]
                 
                 
     # Print the summary of neuronal populations and synapses present in the model
@@ -193,9 +255,9 @@ class rateNeuronSimulator():
         
         print("Populations:")
         for k,v in self.pname2idx.items():
-            print('   ', v, k, self.psize[v], self.ptype[v])
+            print('   ', v, k, self.psize[v], self.ptype[v], self.peqtype[v])
 
         print("Synapses:")
-        for k,v in self.pname2idx.items():
+        for k,v in self.sname2idx.items():
             print('   ', v, k, self.sconn[v], self.stype[v], self.splast[v])
             
