@@ -4,12 +4,12 @@ import cv2
 class cvWriter:
     # Define the codec and create VideoWriter object
     
-    def __init__(self, filePathName, frameDim, frate=20.0, codec='XVID'):
+    def __init__(self, filePathName, frameDim, frate=20.0, codec='XVID', isColor=False):
         # For whatever reason OPENCV needs dimensions in the opposite order
         frameDimT = (frameDim[1], frameDim[0])
         
         fourcc = cv2.VideoWriter_fourcc(*codec)
-        self._out = cv2.VideoWriter(filePathName, fourcc, frate, frameDimT, isColor=False)
+        self._out = cv2.VideoWriter(filePathName, fourcc, frate, frameDimT, isColor=isColor)
 
     # Just necessary to use 'with' command
     def __enter__(self):
