@@ -1,0 +1,83 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[parfill]{parskip}
+%opening
+\title{Predictive Coding meets Control Theory}
+\author{Aleksejs Fomins}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Shallow Predictive Code Using LQR}
+
+Let $u$ be a vector input signal of certain size. That input feeds into a representation population $x$ via a linear transformation $W$. We are constrained to using leaky neurons with certain time constant $\tau$, so the dynamics of $x$ is
+$$\tau \dot{x} = -x + Wu$$
+
+Also, we postulate that that the representation population is sending a feedback signal that is supposed to be predictive of $u$, namely 
+$$\hat{u} = Kx$$
+
+Our goal is to use the predictive feedback as an additional negative input to $x$ in order to make $\hat{u}$ converge to $u$ as fast as possible, while being stable. Thus, the new input is
+$$\epsilon = u - Kx$$
+
+Plugging the new input into the dynamics equation we get
+$$\tau \dot{x} = -x + Wu - WKx$$
+
+Let us define $A = -\mathbb{u} / \tau$ and $B = W / \tau$. Then we get
+$$\dot{x} = (A - BK)x + Bu$$
+
+Control theory states that the above system is stable if all eigenvalues of $A-BK$ are negative. It converges faster, if the eigenvalues are more negative. However, if eigenvalues are too negative, the matrix elements of $K$ are too large, which might be unrealistic. Further, dynamics that is too fast is not robust, being dominated by nonlinear terms that are not typically considered due to complexity. In order solve this problem, Linear Quadratic Regulator (LQR) approach is proposed, selecting the optimal value of $K$ by minimizing the quadratic loss function
+$$J = \int_0^{\infty} (xQx^T +uRu^T)dt$$
+The solution to this minimization problem is given by the linear system
+$$
+\begin{cases}
+K = R^{-1}B^T P\\
+A^TP + PA - PBR^{-1}B^TP + Q = 0
+\end{cases}
+$$
+Substituting for the value of $A$ the second equation simplifies to
+$$-\frac{2}{\tau} P - PBR^{-1}B^TP + Q = 0$$
+Multiplying the equation by $R^{-1}B^T$ and substituting for $K$ we get
+$$-\frac{2}{\tau} K - KBK + R^{-1}B^TQ = 0$$
+We can substitute back $B = W / \tau$ and multiply by $\tau W$ to get
+$$-2 WK - WKWK + WR^{-1}W^TQ = 0$$
+Defining $Z = WK$ and $M = WR^{-1}W^TQ$ we get a quadratic equation
+$$Z^2 + 2 Z = M$$
+Completing the square we get
+$$(Z + \mathbb{I})^2 = M + \mathbb{I}$$
+Taking the square root we get the solution for $K$
+$$K = W^{-1}\biggl((M + \mathbb{I})^{1/2} - \mathbb{I} \biggr)$$
+In order to proceed, we make the approximation $M \ll \mathbb{I}$. The validity of this approximation and its implications should be tested at a later stage, however, in this form the solution is not useful as it contains nonlocal mathematical operations as inverses and square roots. If the approximation holds, we can approximate
+$$(M + \mathbb{I})^{1/2} \approx \mathbb{I} + \frac{1}{2}M - \frac{1}{8}M^2 + ...$$
+which allows us to approximate the expression for the Kalman gain as
+$$K \approx \frac{1}{2}W^{-1}M = \frac{1}{2}R^{-1}W^TQ - ...$$
+In particular, if we consider all input dimensions $u$ and all representation dimensions $r$ equally significant, we can further assume $R = r\mathbb{I}$ and $Q = q\mathbb{I}$, and simplify the expression to
+$$K = \frac{q}{2r}W^T - \frac{q^2}{8r^2}W^TWW^T + ...$$
+
+A question RB1999 were answering was how to select the feedforwards matrix $W$, given that the feedback matrix $K$ is fixed to $K = U$. Their result states that $W = U^T$. We can extend that result, saying that $W = \frac{2r}{q}U^T$, where the gain $\frac{q}{2r}$ is as large as possible, while maintaining the above assumption $M \ll \mathbb{I}$. Using the above simplifications we can rewrite
+$$M = \frac{q}{r} W W^T = \frac{4r}{q} U^T U$$
+
+We will assume that $W$ is only used to rotate the basis, not change its magnitude, namely assuming that $|U^TU| \approx 1$. Then we can set $\frac{2r}{q} = \alpha$, where $\alpha$ is some number smaller than 1. Then
+$$M = 2 \alpha U^T U$$
+and
+$$W = \alpha U^T$$
+
+Notably, if $U^TU \approx \mathbb{I}$, then $(M + \mathbb{I})^{1/2} = \mathbb{I}(1 + \frac{4r}{q})^{1/2}$, then $K = \frac{1}{2}W^T (1 + \frac{4r}{q})^{1/2}$.
+
+So the conclusion is that if the representation matrix is semi-orthogonal, namely, $UU^T = \mathbb{I}$, then it is possible to push the coefficient in front of the feedback matrix as high as possible in order to accelerate convergence. If this is not the case, too high of gain will generate interference terms and blow everything up.
+
+\subsection{Nonlinear Extension}
+
+Control Theory is designed for linear problems. To address nonlinear systems, a linearization of the ODE around an equillibrium point is necessary
+
+
+\end{document}
